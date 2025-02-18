@@ -40,7 +40,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const [completedTimerName, setCompletedTimerName] = useState<string | null>(
     null
   );
-  const [congModal, setCongModal] = useState<boolean>(true);
+  const [congModal, setCongModal] = useState<boolean>(false);
   const [completedList, setCompletedList] = useState<CompletedTimer[]>([]);
   const [timers, setTimers] = useState<Timer[]>([]);
 

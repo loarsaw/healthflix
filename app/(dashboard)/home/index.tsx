@@ -1,147 +1,210 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState, useMemo } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   Modal,
-  SectionList,
+  FlatList,
   ScrollView,
 } from "react-native";
-import { Plus } from "lucide-react-native";
+import { Plus, ChevronDown, ChevronUp } from "lucide-react-native";
 import { Timer, TimerContext, TimerContextType } from "@/context/Provider";
 import Congrats from "@/components/Congrats";
 
+interface TaskForm {
+  name: string;
+  duration: string;
+  category: "work" | "study";
+}
+
+const initialFormState: TaskForm = {
+  name: "",
+  duration: "",
+  category: "work",
+};
+
 const TaskModal = () => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const [name, setName] = useState<string>("");
+  const [form, setForm] = useState<TaskForm>(initialFormState);
+  const [expandedSections, setExpandedSections] = useState({
+    work: true,
+    study: true,
+  });
   const { timers, addTimer, updateTimer } =
     useContext<TimerContextType>(TimerContext);
-  const [duration, setDuration] = useState<string>("");
-  const [category, setCategory] = useState<string>("work");
 
-  const workTimers = timers.filter((timer: any) => timer.category === "work");
-  const studyTimers = timers.filter((timer: any) => timer.category === "study");
-  const sections = [
-    { title: "Work", data: workTimers },
-    { title: "Study", data: studyTimers },
-  ];
+  const workTimers = useMemo(
+    () => timers.filter((timer: Timer) => timer.category === "work"),
+    [timers]
+  );
+
+  const studyTimers = useMemo(
+    () => timers.filter((timer: Timer) => timer.category === "study"),
+    [timers]
+  );
+
+  const handleSubmit = () => {
+    if (form.name.trim() && form.duration.trim()) {
+      addTimer(form.name.trim(), form.duration, form.category);
+      setModalVisible(false);
+      setForm(initialFormState);
+    }
+  };
 
   const toggleModal = () => {
-    if (name.length > 0 && duration.length > 0) {
-      addTimer(name, duration, category);
+    if (!isModalVisible) {
+      setForm(initialFormState);
     }
     setModalVisible(!isModalVisible);
   };
 
-  const startAllTimers = (category: string) => {
-    const sectionTimers = timers.filter(
-      (timer: any) => timer.category === category
+  const toggleSection = (section: "work" | "study") => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const handleBulkAction = (
+    category: string,
+    action: "start" | "pause" | "reset"
+  ) => {
+    const categoryTimers = timers.filter(
+      (timer: Timer) => timer.category === category
     );
-    sectionTimers.forEach((timer: Timer) => {
-      updateTimer(timer.id, { status: "Running" });
+
+    categoryTimers.forEach((timer: Timer) => {
+      switch (action) {
+        case "start":
+          updateTimer(timer.id, { status: "Running" });
+          break;
+        case "pause":
+          updateTimer(timer.id, { status: "Paused" });
+          break;
+        case "reset":
+          updateTimer(timer.id, {
+            status: "Running",
+            remaining: timer.duration,
+          });
+          break;
+      }
     });
   };
 
-  const pauseAllTimers = (category: string) => {
-    const sectionTimers = timers.filter(
-      (timer: any) => timer.category === category
-    );
-    sectionTimers.forEach((timer: Timer) => {
-      updateTimer(timer.id, { status: "Paused" });
-    });
-  };
+  const renderCategoryHeader = (title: string, category: "work" | "study") => (
+    <TouchableOpacity
+      onPress={() => toggleSection(category)}
+      className="flex-row justify-between items-center bg-gray-50 p-2 rounded-t-lg"
+    >
+      <View className="flex-row items-center">
+        {expandedSections[category] ? (
+          <ChevronUp className="mr-2" color="#4B5563" size={20} />
+        ) : (
+          <ChevronDown className="mr-2" color="#4B5563" size={20} />
+        )}
+        <Text className="text-xl font-bold text-gray-800">{title}</Text>
+      </View>
 
-  const resetAll = (category: string) => {
-    const sectionTimers = timers.filter(
-      (timer: any) => timer.category === category
-    );
-    sectionTimers.forEach((timer: Timer) => {
-      updateTimer(timer.id, { status: "Running", remaining: timer.duration });
-    });
-  };
+      {expandedSections[category] && (
+        <View className="flex-row gap-2">
+          <TouchableOpacity
+            onPress={() => handleBulkAction(category, "start")}
+            className="bg-green-500 px-3 py-1 rounded-lg"
+          >
+            <Text className="text-white font-semibold">Start All</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => handleBulkAction(category, "pause")}
+            className="bg-yellow-500 px-3 py-1 rounded-lg"
+          >
+            <Text className="text-white font-semibold">Pause All</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => handleBulkAction(category, "reset")}
+            className="bg-red-500 px-3 py-1 rounded-lg"
+          >
+            <Text className="text-white font-semibold">Reset All</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+
+  const renderTimer = ({ item }: { item: Timer }) => (
+    <View className="p-4 bg-white border-b border-gray-200">
+      <Text className="font-bold text-lg text-gray-800">{item.name}</Text>
+      <Text className="text-sm text-gray-600 mb-2">
+        Status: {item.status} | Remaining: {item.remaining}s
+      </Text>
+
+      <View className="flex-row gap-3">
+        <TouchableOpacity
+          onPress={() => updateTimer(item.id, { status: "Running" })}
+          className="bg-green-500 px-4 py-2 rounded-lg"
+        >
+          <Text className="text-white font-semibold">Start</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => updateTimer(item.id, { status: "Paused" })}
+          className="bg-yellow-500 px-4 py-2 rounded-lg"
+        >
+          <Text className="text-white font-semibold">Pause</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() =>
+            updateTimer(item.id, {
+              remaining: item.duration,
+              status: "Running",
+            })
+          }
+          className="bg-red-500 px-4 py-2 rounded-lg"
+        >
+          <Text className="text-white font-semibold">Reset</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const ListEmptyComponent = () => (
+    <Text className="text-center text-gray-500 mt-4">No Timers Found</Text>
+  );
 
   return (
-    <View className="flex-1 justify-end m-4">
-      <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
-        <View className="flex-1 rounded-lg shadow-md p-4">
-          <SectionList
-            sections={sections}
-            keyExtractor={(item, index) => index.toString()}
-            renderSectionHeader={({ section }) => (
-              <View className="flex-row justify-between items-center">
-                <Text className="text-xl font-bold text-gray-800 mt-4 mb-2">
-                  {section.title}
-                </Text>
+    <View className="flex-1 mt-10">
+      <ScrollView className="flex-1 p-4">
+        <View className="mb-6">
+          {renderCategoryHeader("Work", "work")}
+          {expandedSections.work && (
+            <FlatList
+              data={workTimers}
+              renderItem={renderTimer}
+              keyExtractor={(item) => String(item.id)}
+              ListEmptyComponent={ListEmptyComponent}
+              className="bg-white rounded-b-lg"
+              scrollEnabled={false}
+              nestedScrollEnabled
+            />
+          )}
+        </View>
 
-                <View className="flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={() => startAllTimers(section.title.toLowerCase())}
-                    className="bg-green-500 px-4 py-2 rounded-lg"
-                  >
-                    <Text className="text-white font-semibold">Start All</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => pauseAllTimers(section.title.toLowerCase())}
-                    className="bg-yellow-500 px-4 py-2 rounded-lg"
-                  >
-                    <Text className="text-white font-semibold">Pause All</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => resetAll(section.title.toLowerCase())}
-                    className="bg-red-500 px-4 py-2 rounded-lg"
-                  >
-                    <Text className="text-white font-semibold">Reset All</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-            renderItem={({ item }) => (
-              <View className="p-4 bg-white rounded-lg shadow mb-4">
-                <Text className="font-bold text-lg text-gray-800">
-                  {item.name}
-                </Text>
-                <Text className="text-sm text-gray-600 mb-2">
-                  Status: {item.status} | Remaining: {item.remaining}s
-                </Text>
-
-                <View className="flex-row gap-3">
-                  <TouchableOpacity
-                    onPress={() => updateTimer(item.id, { status: "Running" })}
-                    className="bg-green-500 px-4 py-2 rounded-lg"
-                  >
-                    <Text className="text-white font-semibold">Start</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => updateTimer(item.id, { status: "Paused" })}
-                    className="bg-yellow-500 px-4 py-2 rounded-lg"
-                  >
-                    <Text className="text-white font-semibold">Pause</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() =>
-                      updateTimer(item.id, {
-                        remaining: item.duration,
-                        status: "Running",
-                      })
-                    }
-                    className="bg-red-500 px-4 py-2 rounded-lg"
-                  >
-                    <Text className="text-white font-semibold">Reset</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-            ListEmptyComponent={() => (
-              <Text className="text-center text-gray-500 mt-4">
-                No Timers Found
-              </Text>
-            )}
-          />
+        <View className="mb-20">
+          {renderCategoryHeader("Study", "study")}
+          {expandedSections.study && (
+            <FlatList
+              data={studyTimers}
+              renderItem={renderTimer}
+              keyExtractor={(item) => String(item.id)}
+              ListEmptyComponent={ListEmptyComponent}
+              className="bg-white rounded-b-lg"
+              scrollEnabled={false}
+              nestedScrollEnabled
+            />
+          )}
         </View>
       </ScrollView>
 
@@ -161,34 +224,39 @@ const TaskModal = () => {
 
             <TextInput
               placeholder="Enter Timer Name"
-              value={name}
-              onChangeText={setName}
+              value={form.name}
+              onChangeText={(text) =>
+                setForm((prev) => ({ ...prev, name: text }))
+              }
               className="border-b mb-4 p-3 text-lg text-gray-800"
             />
 
             <TextInput
               placeholder="Enter Duration (seconds)"
-              value={duration}
-              onChangeText={setDuration}
+              value={form.duration}
+              onChangeText={(text) =>
+                setForm((prev) => ({ ...prev, duration: text }))
+              }
               keyboardType="numeric"
               className="border-b mb-4 p-3 text-lg text-gray-800"
             />
 
-            <View className="border-b mb-4">
-              <TouchableOpacity
-                onPress={() =>
-                  setCategory(category === "work" ? "study" : "work")
-                }
-                className="p-3"
-              >
-                <Text className="text-lg text-gray-800">
-                  {category === "work" ? "Switch to Study" : "Switch to Work"}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              onPress={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  category: prev.category === "work" ? "study" : "work",
+                }))
+              }
+              className="border-b mb-4 p-3"
+            >
+              <Text className="text-lg text-gray-800">
+                Switch to {form.category === "work" ? "Study" : "Work"}
+              </Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={toggleModal}
+              onPress={handleSubmit}
               className="bg-purple-600 p-4 rounded-lg mt-4 items-center"
             >
               <Text className="text-white text-lg font-bold">Save Task</Text>
