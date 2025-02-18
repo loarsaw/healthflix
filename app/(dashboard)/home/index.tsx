@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Plus } from "lucide-react-native";
 import { TimerContext } from "@/context/Provider";
+import Congrats from "@/components/Congrats";
 
 const TaskModal = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -106,7 +107,7 @@ const TaskModal = () => {
       >
         <Plus color="white" size={24} />
       </TouchableOpacity>
-
+      <Congrats />
       <Modal visible={isModalVisible} transparent animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white p-6 rounded-lg w-4/5">

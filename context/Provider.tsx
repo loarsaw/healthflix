@@ -4,6 +4,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const TimerContext = createContext<any>(null);
 
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
+  const [completedTimer, setCompleted] = useState<number | null>(null);
+  const [congModal, setCongModal] = useState<boolean>(true);
+  const [completedList, setCompletedList] = useState<number[]>([]);
   const [timers, setTimers] = useState<
     {
       name: string;
@@ -58,13 +61,20 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
           if (timer.status === "Running" && timer.remaining > 0) {
             return { ...timer, remaining: timer.remaining - 1 };
           }
+          console.log(completedList.includes(timer.id), "you");
+          if (timer.remaining == 0) {
+            if (!completedList.includes(timer.id)) {
+              setCompleted(timer.id);
+              setCongModal(true);
+            }
+          }
           return timer;
         })
       );
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [completedList, congModal]);
 
   const resetTimer = (id: number) => {
     setTimers((prevTimers) =>
@@ -90,10 +100,20 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
       },
     ]);
   };
+  console.log(completedList, "completedList");
 
   return (
     <TimerContext.Provider
-      value={{ timers, addTimer, updateTimer, resetTimer }}
+      value={{
+        timers,
+        addTimer,
+        updateTimer,
+        resetTimer,
+        setCongModal,
+        completedTimer,
+        congModal,
+        setCompletedList,
+      }}
     >
       {children}
     </TimerContext.Provider>
