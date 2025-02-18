@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  SectionList,
 } from "react-native";
 import { Plus } from "lucide-react-native";
 import { TimerContext } from "@/context/Provider";
@@ -17,6 +18,13 @@ const TaskModal = () => {
   const [duration, setDuration] = useState<string>("");
   const [category, setCategory] = useState<string | number>("work");
 
+  const workTimers = timers.filter((timer: any) => timer.category === "work");
+  const studyTimers = timers.filter((timer: any) => timer.category === "study");
+  const sections = [
+    { title: "Work", data: workTimers },
+    { title: "Study", data: studyTimers },
+  ];
+
   const toggleModal = () => {
     if ((name.length > 0, duration.length > 0)) {
       addTimer(name, duration, category);
@@ -27,8 +35,8 @@ const TaskModal = () => {
 
   return (
     <View className="flex-1 justify-end m-4">
-      <View className="flex-1 h-40 bg-green-500">
-        <FlatList
+      <View className="flex-1 h-full bg-green-500">
+        {/* <FlatList
           data={timers}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
@@ -40,6 +48,26 @@ const TaskModal = () => {
                 Status: {item.status} | Remaining: {item.remaining}s
               </Text>
             </View>
+          )}
+        /> */}
+        <SectionList
+          sections={sections}
+          keyExtractor={(item, index) => index.toString()}
+          renderSectionHeader={({ section }) => (
+            <Text className="text-xl font-bold text-white mt-4">
+              {section.title}
+            </Text>
+          )}
+          renderItem={({ item }) => (
+            <View className="p-4 bg-white rounded-lg shadow mt-2">
+              <Text className="font-bold">{item.name}</Text>
+              <Text>
+                Status: {item.status} | Remaining: {item.remaining}s
+              </Text>
+            </View>
+          )}
+          ListEmptyComponent={() => (
+            <Text className="text-center text-white mt-4">emty</Text>
           )}
         />
       </View>
