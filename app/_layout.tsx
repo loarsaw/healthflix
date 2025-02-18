@@ -62,16 +62,7 @@ export default function RootLayout() {
             }}
             name="(history)"
           />
-          <Tabs.Screen
-            options={{
-              headerShown: false,
-              title: "Account",
-              tabBarIcon: ({ color }) => (
-                <MaterialIcons size={28} name="verified-user" color={color} />
-              ),
-            }}
-            name="(account)"
-          />
+        
         </Tabs>
         <StatusBar style="auto" />
       </ThemeProvider>

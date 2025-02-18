@@ -12,12 +12,7 @@ export default function StackLayout() {
                     headerShown: false
                 }}
             />
-            <Stack.Screen
-                name="quiz"
-                options={{
-                    headerShown: false
-                }}
-            />
+      
 
         </Stack>
     );

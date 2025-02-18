@@ -231,7 +231,8 @@ const TaskModal = () => {
     <View className="flex-1 mt-10">
       <ScrollView className="flex-1 p-4">
         <View className="mb-6">
-          {renderCategoryHeader("Work", "work")}
+          {renderCategoryHeader("Study", "study")}
+
           {expandedSections.work && (
             <FlatList
               data={workTimers}
@@ -246,7 +247,8 @@ const TaskModal = () => {
         </View>
 
         <View className="mb-20">
-          {renderCategoryHeader("Study", "study")}
+          {renderCategoryHeader("Work", "work")}
+
           {expandedSections.study && (
             <FlatList
               data={studyTimers}
