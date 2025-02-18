@@ -1,5 +1,12 @@
 import React, { useContext, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+} from "react-native";
 import { Plus } from "lucide-react-native";
 import { TimerContext } from "@/context/Provider";
 
@@ -20,6 +27,22 @@ const TaskModal = () => {
 
   return (
     <View className="flex-1 justify-end m-4">
+      <View className="flex-1 h-40 bg-green-500">
+        <FlatList
+          data={timers}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View className="p-4 border-b">
+              <Text className="font-bold">
+                {item.name} ({item.category})
+              </Text>
+              <Text>
+                Status: {item.status} | Remaining: {item.remaining}s
+              </Text>
+            </View>
+          )}
+        />
+      </View>
       <TouchableOpacity
         className="absolute bottom-5 right-5 bg-purple-600 rounded-full p-4 shadow-lg"
         onPress={toggleModal}

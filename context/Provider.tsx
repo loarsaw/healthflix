@@ -48,7 +48,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
         duration: dur,
         category,
         remaining: dur,
-        status: "Paused",
+        status: "Running",
       },
     ]);
   };
