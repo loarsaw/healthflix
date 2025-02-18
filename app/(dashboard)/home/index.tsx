@@ -14,7 +14,7 @@ import { TimerContext } from "@/context/Provider";
 const TaskModal = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState<string>("");
-  const { timers, addTimer } = useContext(TimerContext);
+  const { timers, addTimer, resetTimer } = useContext(TimerContext);
   const [duration, setDuration] = useState<string>("");
   const [category, setCategory] = useState<string | number>("work");
 
@@ -64,6 +64,23 @@ const TaskModal = () => {
               <Text>
                 Status: {item.status} | Remaining: {item.remaining}s
               </Text>
+
+              <View className="flex-row gap-2 mt-2">
+                <TouchableOpacity className="bg-green-500 px-3 py-1 rounded">
+                  <Text className="text-white">Start</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity className="bg-yellow-500 px-3 py-1 rounded">
+                  <Text className="text-white">Pause</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="bg-red-500 px-3 py-1 rounded"
+                  onPress={() => resetTimer(item.id)}
+                >
+                  <Text className="text-white">Reset</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
           ListEmptyComponent={() => (

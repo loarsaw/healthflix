@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const TimerContext = createContext<any>(null);
 
@@ -13,6 +14,33 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
       remaining: number;
     }[]
   >([]);
+
+  useEffect(() => {
+    const loadTimers = async () => {
+      try {
+        const storedTimers = await AsyncStorage.getItem("timers");
+        if (storedTimers) {
+          setTimers(JSON.parse(storedTimers));
+        }
+      } catch (error) {
+        console.error("Error loading timers:", error);
+      }
+    };
+
+    loadTimers();
+  }, []);
+
+  useEffect(() => {
+    const saveTimers = async () => {
+      try {
+        await AsyncStorage.setItem("timers", JSON.stringify(timers));
+      } catch (error) {
+        console.error("Error saving timers:", error);
+      }
+    };
+
+    saveTimers();
+  }, [timers]);
 
   const updateTimer = (
     id: number,
@@ -38,6 +66,16 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     return () => clearInterval(interval);
   }, []);
 
+  const resetTimer = (id: number) => {
+    setTimers((prevTimers) =>
+      prevTimers.map((timer) =>
+        timer.id === id
+          ? { ...timer, remaining: timer.duration, status: "Running" }
+          : timer
+      )
+    );
+  };
+
   const addTimer = (name: string, duration: number, category: string) => {
     const dur = Number(duration);
     setTimers((prevTimers) => [
@@ -54,7 +92,9 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <TimerContext.Provider value={{ timers, addTimer }}>
+    <TimerContext.Provider
+      value={{ timers, addTimer, updateTimer, resetTimer }}
+    >
       {children}
     </TimerContext.Provider>
   );
