@@ -33,6 +33,33 @@ const TaskModal = () => {
     setModalVisible(!isModalVisible);
   };
 
+  const startAllTimers = (category: string) => {
+    const sectionTimers = timers.filter(
+      (timer: any) => timer.category === category
+    );
+    sectionTimers.forEach((timer) => {
+      updateTimer(timer.id, { status: "Running" });
+    });
+  };
+
+  const pauseAllTimers = (category: string) => {
+    const sectionTimers = timers.filter(
+      (timer: any) => timer.category === category
+    );
+    sectionTimers.forEach((timer) => {
+      updateTimer(timer.id, { status: "Paused" });
+    });
+  };
+
+  const resetAll = (category: string) => {
+    const sectionTimers = timers.filter(
+      (timer: any) => timer.category === category
+    );
+    sectionTimers.forEach((timer) => {
+      updateTimer(timer.id, { status: "Running", remaining: timer.duration });
+    });
+  };
+
   return (
     <View className="flex-1 justify-end m-4">
       <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
@@ -41,9 +68,34 @@ const TaskModal = () => {
             sections={sections}
             keyExtractor={(item, index) => index.toString()}
             renderSectionHeader={({ section }) => (
-              <Text className="text-xl font-bold text-gray-800 mt-4 mb-2">
-                {section.title}
-              </Text>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-xl font-bold text-gray-800 mt-4 mb-2">
+                  {section.title}
+                </Text>
+
+                <View className="flex-row gap-2">
+                  <TouchableOpacity
+                    onPress={() => startAllTimers(section.title.toLowerCase())}
+                    className="bg-green-500 px-4 py-2 rounded-lg"
+                  >
+                    <Text className="text-white font-semibold">Start All</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => pauseAllTimers(section.title.toLowerCase())}
+                    className="bg-yellow-500 px-4 py-2 rounded-lg"
+                  >
+                    <Text className="text-white font-semibold">Pause All</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => resetAll(section.title.toLowerCase())}
+                    className="bg-red-500 px-4 py-2 rounded-lg"
+                  >
+                    <Text className="text-white font-semibold">Reset All</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
             renderItem={({ item }) => (
               <View className="p-4 bg-white rounded-lg shadow mb-4">
