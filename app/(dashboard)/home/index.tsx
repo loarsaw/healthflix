@@ -9,15 +9,16 @@ import {
   ScrollView,
 } from "react-native";
 import { Plus } from "lucide-react-native";
-import { TimerContext } from "@/context/Provider";
+import { Timer, TimerContext, TimerContextType } from "@/context/Provider";
 import Congrats from "@/components/Congrats";
 
 const TaskModal = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState<string>("");
-  const { timers, addTimer, updateTimer } = useContext(TimerContext);
+  const { timers, addTimer, updateTimer } =
+    useContext<TimerContextType>(TimerContext);
   const [duration, setDuration] = useState<string>("");
-  const [category, setCategory] = useState<string | number>("work");
+  const [category, setCategory] = useState<string>("work");
 
   const workTimers = timers.filter((timer: any) => timer.category === "work");
   const studyTimers = timers.filter((timer: any) => timer.category === "study");
@@ -37,7 +38,7 @@ const TaskModal = () => {
     const sectionTimers = timers.filter(
       (timer: any) => timer.category === category
     );
-    sectionTimers.forEach((timer) => {
+    sectionTimers.forEach((timer: Timer) => {
       updateTimer(timer.id, { status: "Running" });
     });
   };
@@ -46,7 +47,7 @@ const TaskModal = () => {
     const sectionTimers = timers.filter(
       (timer: any) => timer.category === category
     );
-    sectionTimers.forEach((timer) => {
+    sectionTimers.forEach((timer: Timer) => {
       updateTimer(timer.id, { status: "Paused" });
     });
   };
@@ -55,7 +56,7 @@ const TaskModal = () => {
     const sectionTimers = timers.filter(
       (timer: any) => timer.category === category
     );
-    sectionTimers.forEach((timer) => {
+    sectionTimers.forEach((timer: Timer) => {
       updateTimer(timer.id, { status: "Running", remaining: timer.duration });
     });
   };

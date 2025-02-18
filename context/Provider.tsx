@@ -1,7 +1,39 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const TimerContext = createContext<any>(null);
+export interface Timer {
+  id: number;
+  name: string;
+  duration: number;
+  category: string;
+  status: string;
+  remaining: number;
+}
+
+export interface CompletedTimer {
+  id: number;
+  completedTime: Date;
+  timerName: string;
+}
+
+export interface TimerContextType {
+  timers: Timer[];
+  addTimer: (name: string, duration: string, category: string) => void;
+  updateTimer: (
+    id: number,
+    updates: Partial<{ remaining: number; status: string }>
+  ) => void;
+  resetTimer: (id: number) => void;
+  setCongModal: React.Dispatch<React.SetStateAction<boolean>>;
+  completedTimer: number | null;
+  congModal: boolean;
+  completedList: CompletedTimer[];
+  setCompletedList: React.Dispatch<React.SetStateAction<CompletedTimer[]>>;
+  completedTimerName: string | null;
+  setCompletedTimerName: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+export const TimerContext = createContext<TimerContextType | null>(null);
 
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const [completedTimer, setCompleted] = useState<number | null>(null);
@@ -9,19 +41,8 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     null
   );
   const [congModal, setCongModal] = useState<boolean>(true);
-  const [completedList, setCompletedList] = useState<
-    { id: number; completedTime: Date; timerName: string }[]
-  >([]);
-  const [timers, setTimers] = useState<
-    {
-      name: string;
-      duration: number;
-      category: string;
-      id: number;
-      status: string;
-      remaining: number;
-    }[]
-  >([]);
+  const [completedList, setCompletedList] = useState<CompletedTimer[]>([]);
+  const [timers, setTimers] = useState<Timer[]>([]);
 
   useEffect(() => {
     const loadTimers = async () => {
@@ -67,8 +88,8 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
             return { ...timer, remaining: timer.remaining - 1 };
           }
 
-          if (timer.remaining == 0) {
-            if (!completedList.find((item) => item.id == timer.id)) {
+          if (timer.remaining === 0) {
+            if (!completedList.find((item) => item.id === timer.id)) {
               setCompleted(timer.id);
               setCompletedTimerName(timer.name);
               setCongModal(true);
@@ -92,7 +113,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
-  const addTimer = (name: string, duration: number, category: string) => {
+  const addTimer = (name: string, duration: string, category: string) => {
     const dur = Number(duration);
     setTimers((prevTimers) => [
       ...prevTimers,
@@ -106,6 +127,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
       },
     ]);
   };
+
   console.log(completedList, "completedList");
 
   return (
