@@ -1,8 +1,7 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { View, Text, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
-import { TimerContext } from "@/context/Provider";
+import { TimerContext, TimerContextType } from "@/context/Provider";
 
 type TimerItem = {
   id: number;
@@ -11,12 +10,15 @@ type TimerItem = {
 };
 
 const CompletedTimers: React.FC = () => {
-  const { completedList } = useContext(TimerContext);
+  const { completedList } = useContext<TimerContextType>(TimerContext);
 
-  const renderItem = ({ item }: { item: TimerItem }) => {
-    return (
-      <Link href={`/details/${item.id}`}>
-        <View className="bg-white rounded-lg shadow-lg mb-4 p-6" style={{ height: 120, width: 320 }}>
+  const renderItem = useMemo(() => {
+    return ({ item }: { item: TimerItem }) => {
+      return (
+        <View
+          className="bg-white rounded-lg shadow-lg mb-4 p-6"
+          style={{ height: 120, width: 320 }}
+        >
           <View className="flex-1">
             <Text className="text-xl font-semibold text-gray-900 mb-2">
               Timer Name: {item.timerName}
@@ -26,9 +28,10 @@ const CompletedTimers: React.FC = () => {
             </Text>
           </View>
         </View>
-      </Link>
-    );
-  };
+      );
+    };
+  // will only need to render it once , unlike the progressbar we arnt reclauting the progress 
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-emerald-50 px-5 py-6 justify-center items-center">
