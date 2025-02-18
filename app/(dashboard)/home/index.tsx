@@ -93,105 +93,94 @@ const TaskModal = () => {
     });
   };
 
-
-  const renderCategoryHeader = useMemo(() => {
-    return (title: string, category: "work" | "study") => (
-      <TouchableOpacity
-        onPress={() => toggleSection(category)}
-        className="flex-row justify-between items-center bg-gray-50 p-2 rounded-t-lg"
-      >
-        <View className="flex-row items-center">
-          {expandedSections[category] ? (
-            <ChevronUp className="mr-2" color="#4B5563" size={20} />
-          ) : (
-            <ChevronDown className="mr-2" color="#4B5563" size={20} />
-          )}
-          <Text className="text-xl font-bold text-gray-800">{title}</Text>
-        </View>
-
-        {expandedSections[category] && (
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              onPress={() => handleBulkAction(category, "start")}
-              className="bg-green-500 px-3 py-1 rounded-lg"
-            >
-              <Text className="text-white font-semibold">Start All</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleBulkAction(category, "pause")}
-              className="bg-yellow-500 px-3 py-1 rounded-lg"
-            >
-              <Text className="text-white font-semibold">Pause All</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleBulkAction(category, "reset")}
-              className="bg-red-500 px-3 py-1 rounded-lg"
-            >
-              <Text className="text-white font-semibold">Reset All</Text>
-            </TouchableOpacity>
-          </View>
+  const renderCategoryHeader = (title: string, category: "work" | "study") => (
+    <TouchableOpacity
+      onPress={() => toggleSection(category)}
+      className="flex-row justify-between items-center bg-gray-50 p-2 rounded-t-lg"
+    >
+      <View className="flex-row items-center">
+        {expandedSections[category] ? (
+          <ChevronUp className="mr-2" color="#4B5563" size={20} />
+        ) : (
+          <ChevronDown className="mr-2" color="#4B5563" size={20} />
         )}
-      </TouchableOpacity>
-    );
-  }, [expandedSections, toggleSection, handleBulkAction]); // Add necessary dependencies
+        <Text className="text-xl font-bold text-gray-800">{title}</Text>
+      </View>
 
-  const renderTimer = useMemo(() => {
-    return ({ item }: { item: Timer }) => {
-      const progress = ((item.duration - item.remaining) / item.duration) * 100;
+      {expandedSections[category] && (
+        <View className="flex-row gap-2">
+          <TouchableOpacity
+            onPress={() => handleBulkAction(category, "start")}
+            className="bg-green-500 px-3 py-1 rounded-lg"
+          >
+            <Text className="text-white font-semibold">Start All</Text>
+          </TouchableOpacity>
 
-      return (
-        <View className="p-4 bg-white border-b border-gray-200">
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="font-bold text-lg text-gray-800">{item.name}</Text>
-            <Text className="text-sm text-gray-600">Status: {item.status}</Text>
-          </View>
+          <TouchableOpacity
+            onPress={() => handleBulkAction(category, "pause")}
+            className="bg-yellow-500 px-3 py-1 rounded-lg"
+          >
+            <Text className="text-white font-semibold">Pause All</Text>
+          </TouchableOpacity>
 
-          <ProgressBar
-            progress={progress}
-            status={item.status}
-            duration={item.duration}
-            remaining={item.remaining}
-          />
-
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              onPress={() => updateTimer(item.id, { status: "Running" })}
-              className="bg-green-500 px-4 py-2 rounded-lg flex-1"
-            >
-              <Text className="text-white font-semibold text-center">
-                Start
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => updateTimer(item.id, { status: "Paused" })}
-              className="bg-yellow-500 px-4 py-2 rounded-lg flex-1"
-            >
-              <Text className="text-white font-semibold text-center">
-                Pause
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() =>
-                updateTimer(item.id, {
-                  remaining: item.duration,
-                  status: "Running",
-                })
-              }
-              className="bg-red-500 px-4 py-2 rounded-lg flex-1"
-            >
-              <Text className="text-white font-semibold text-center">
-                Reset
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={() => handleBulkAction(category, "reset")}
+            className="bg-red-500 px-3 py-1 rounded-lg"
+          >
+            <Text className="text-white font-semibold">Reset All</Text>
+          </TouchableOpacity>
         </View>
-      );
-    };
-  }, [updateTimer]);
+      )}
+    </TouchableOpacity>
+  );
+
+  const renderTimer = ({ item }: { item: Timer }) => {
+    const progress = ((item.duration - item.remaining) / item.duration) * 100;
+
+    return (
+      <View className="p-4 bg-white border-b border-gray-200">
+        <View className="flex-row justify-between items-center mb-2">
+          <Text className="font-bold text-lg text-gray-800">{item.name}</Text>
+          <Text className="text-sm text-gray-600">Status: {item.status}</Text>
+        </View>
+
+        <ProgressBar
+          progress={progress}
+          status={item.status}
+          duration={item.duration}
+          remaining={item.remaining}
+        />
+
+        <View className="flex-row gap-3">
+          <TouchableOpacity
+            onPress={() => updateTimer(item.id, { status: "Running" })}
+            className="bg-green-500 px-4 py-2 rounded-lg flex-1"
+          >
+            <Text className="text-white font-semibold text-center">Start</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => updateTimer(item.id, { status: "Paused" })}
+            className="bg-yellow-500 px-4 py-2 rounded-lg flex-1"
+          >
+            <Text className="text-white font-semibold text-center">Pause</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() =>
+              updateTimer(item.id, {
+                remaining: item.duration,
+                status: "Running",
+              })
+            }
+            className="bg-red-500 px-4 py-2 rounded-lg flex-1"
+          >
+            <Text className="text-white font-semibold text-center">Reset</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
   const ListEmptyComponent = () => (
     <Text className="text-center text-gray-500 mt-4">No Timers Found</Text>
   );
