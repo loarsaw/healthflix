@@ -27,7 +27,11 @@ const Congrats: React.FC = () => {
             onPress={() => {
               setCompletedList((per: []) => [
                 ...per,
-                { id: completedTimer, completedTime: Date.now() },
+                {
+                  id: completedTimer,
+                  completedTime: new Date(),
+                  timerName: completedTimerName,
+                },
               ]);
               setCongModal(false);
               setCompletedTimerName(null);

@@ -10,7 +10,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   );
   const [congModal, setCongModal] = useState<boolean>(true);
   const [completedList, setCompletedList] = useState<
-    { id: number; completedTime: Date }[]
+    { id: number; completedTime: Date; timerName: string }[]
   >([]);
   const [timers, setTimers] = useState<
     {
@@ -66,10 +66,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
           if (timer.status === "Running" && timer.remaining > 0) {
             return { ...timer, remaining: timer.remaining - 1 };
           }
-          console.log(
-            completedList.find((item) => item.id == timer.id),
-            "you"
-          );
+
           if (timer.remaining == 0) {
             if (!completedList.find((item) => item.id == timer.id)) {
               setCompleted(timer.id);
@@ -121,6 +118,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
         setCongModal,
         completedTimer,
         congModal,
+        completedList,
         setCompletedList,
         completedTimerName,
         setCompletedTimerName,

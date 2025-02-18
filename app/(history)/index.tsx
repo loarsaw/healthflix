@@ -1,45 +1,31 @@
-import { RootState } from '@/redux/store';
-import React from 'react';
-import { View, Text, Image, FlatList } from 'react-native';
-import { useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link } from 'expo-router';
-import { backgroundVariantByScore } from '../../utils/cva';
-import clsx from 'clsx';
+import { RootState } from "@/redux/store";
+import React, { useContext } from "react";
+import { View, Text, FlatList } from "react-native";
+import { useSelector } from "react-redux";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Link } from "expo-router";
+import { backgroundVariantByScore } from "../../utils/cva";
+import { TimerContext } from "@/context/Provider";
 
-type quesString = {
-  question: string;
-  options: string[];
-  correctAnswer: string;
+type TimerItem = {
+  id: number;
+  completedTime: Date;
+  timerName: string;
 };
 
-type HistoryItem = {
-  id: string;
-  questions: quesString[];
-  score: number;
-  attemptedOn: string;
-};
-
-const QuizHistory: React.FC = () => {
-  const { history } = useSelector((state: RootState) => state.history);
-
-  const renderItem = ({ item }: { item: HistoryItem }) => {
-    console.log(item.score)
+const CompletedTimers: React.FC = () => {
+  const {completedList} = useContext(TimerContext)
+  const renderItem = ({ item }: { item: TimerItem }) => {
     return (
       <Link href={`/details/${item.id}`}>
         <View className={backgroundVariantByScore(4)}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/50' }}
-            className="w-12 h-12 rounded-full mr-4"
-          />
           <View className="flex-1">
             <Text className="text-lg font-bold text-gray-800 mb-1">
-              Attempted On: {item.attemptedOn}
+              Timer Name: {item.timerName}
             </Text>
-            <View className={clsx(item.score > 0 ? "bg-green-300" : "bg-white", "w-full p-4")}>
-
-              <Text className="text-sm text-gray-600">Score: {item.score}</Text>
-            </View>
+            <Text className="text-sm text-gray-600">
+              Completed On: {item.completedTime.toLocaleDateString()}
+            </Text>
           </View>
         </View>
       </Link>
@@ -48,15 +34,17 @@ const QuizHistory: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-emerald-50 px-5">
-      <Text className="text-3xl font-bold text-center text-gray-800 mb-5">Quiz History</Text>
-      {history.length === 0 ? (
+      <Text className="text-3xl font-bold text-center text-gray-800 mb-5">
+        Completed Timers
+      </Text>
+      {completedList.length === 0 ? (
         <View className="flex-1 justify-center items-center mt-10">
-          <Text className="text-xl text-gray-500">No Attempted Quiz</Text>
+          <Text className="text-xl text-gray-500">No Completed Timers</Text>
         </View>
       ) : (
         <FlatList
-          data={history}
-          keyExtractor={(item) => item.id}
+          data={completedList}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
         />
       )}
@@ -64,4 +52,4 @@ const QuizHistory: React.FC = () => {
   );
 };
 
-export default QuizHistory;
+export default CompletedTimers;
