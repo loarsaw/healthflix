@@ -1,16 +1,22 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Modal } from "react-native";
 import { Plus } from "lucide-react-native";
+import { TimerContext } from "@/context/Provider";
 
 const TaskModal = () => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const [name, setName] = useState("");
-  const [duration, setDuration] = useState("");
-  const [category, setCategory] = useState("work");
+  const [name, setName] = useState<string>("");
+  const { timers, addTimer } = useContext(TimerContext);
+  const [duration, setDuration] = useState<string>("");
+  const [category, setCategory] = useState<string | number>("work");
 
   const toggleModal = () => {
+    if ((name.length > 0, duration.length > 0)) {
+      addTimer(name, duration, category);
+    }
     setModalVisible(!isModalVisible);
   };
+  console.log(timers);
 
   return (
     <View className="flex-1 justify-end m-4">
@@ -41,7 +47,9 @@ const TaskModal = () => {
             <View className="border-b mb-4">
               <TouchableOpacity
                 className="p-2"
-                onPress={() => setCategory(category === "work" ? "study" : "work")}
+                onPress={() =>
+                  setCategory(category === "work" ? "study" : "work")
+                }
               >
                 <Text>{category === "work" ? "Work" : "Study"}</Text>
               </TouchableOpacity>

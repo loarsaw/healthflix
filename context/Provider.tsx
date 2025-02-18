@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 
 export const TimerContext = createContext<any>(null);
 
@@ -14,23 +14,47 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     }[]
   >([]);
 
+  const updateTimer = (
+    id: number,
+    updates: Partial<{ remaining: number; status: string }>
+  ) => {
+    setTimers((prevTimers) =>
+      prevTimers.map((t) => (t.id === id ? { ...t, ...updates } : t))
+    );
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimers((prevTimers) =>
+        prevTimers.map((timer) => {
+          if (timer.status === "Running" && timer.remaining > 0) {
+            return { ...timer, remaining: timer.remaining - 1 };
+          }
+          return timer;
+        })
+      );
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const addTimer = (name: string, duration: number, category: string) => {
+    const dur = Number(duration);
     setTimers((prevTimers) => [
       ...prevTimers,
       {
         id: Date.now(),
         name,
-        duration,
+        duration: dur,
         category,
-        remaining: duration,
+        remaining: dur,
         status: "Paused",
       },
     ]);
   };
 
-
   return (
-    <TimerContext.Provider value={{ timers, addTimer}}>
+    <TimerContext.Provider value={{ timers, addTimer }}>
       {children}
     </TimerContext.Provider>
   );
